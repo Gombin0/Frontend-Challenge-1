@@ -12,13 +12,23 @@ startBtn.addEventListener("click", startPauseCountDown);
 settingsBtn.addEventListener("click", editTimer);
 
 function startPauseCountDown() {
-    if (interval === null) {
+    let isInputValid = inputValidation(minutesInput.value, secondsInput.value);
+
+    // above 60 seconds, switch seconds to minutes
+    if (parseInt(secondsInput.value) / 60 >= 1) {
+        minutesInput.value = parseInt(minutesInput.value) + parseInt(secondsInput.value / 60);
+        minutesInput.value = minutesInput.value.toString().padStart(2, '0');
+        secondsInput.value = parseInt(secondsInput.value % 60).toString().padStart(2, '0');
+    }
+
+    if (interval === null && isInputValid) {
         startBtn.innerHTML = 'pause';
         strokePropertiesObj = calcStrokeStuff();
         interval = setInterval(countDown, 1000);
         editTimer();
-    }
-    else {
+    } else if (!isInputValid) {
+        alert('Please give non-negative numbers only! Min value is 1 second.');
+    } else {
         startBtn.innerHTML = 'start';
         clearInterval(interval);
         interval = null;
@@ -56,7 +66,6 @@ function editTimer() {
         minutesInput.setAttribute('disabled', '');
         secondsInput.setAttribute('disabled', '');
     }
-
 }
 
 function resetTimerAfterFinish() {
@@ -91,4 +100,12 @@ function drawStroke() {
         circle.style.transitionDuration = '200ms';
         ringDiv.classList.add('ending')
     }
+}
+
+function inputValidation(minutes, seconds) {
+    const onlyNumbers = /^\d+$/;
+    let areInputsContainsOnlyNumbers = onlyNumbers.test(minutes) && onlyNumbers.test(seconds);
+    let areNumbersNonNegative = minutes >= 0 && seconds >= 0;
+    let areBothNumbersZero = minutes == 0 && seconds == 0;
+    return areInputsContainsOnlyNumbers && areNumbersNonNegative && !areBothNumbersZero;
 }
